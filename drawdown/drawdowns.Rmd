@@ -87,6 +87,9 @@ genTables <- function(symbols, startDate, endDate){
 
 The list of *Recovering* stocks are those that have bounced back from their deepest drawdown during the given time-frame.
 
+To customize this report, use [pluto!](http://pluto.studio). Here's a notebook that can get you started: [Index-constituent-drawdowns.R](https://github.com/stockviz/plutons/blob/master/Index-constituent-drawdowns.R.ipynb).
+
+
 ```{r, index_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE}
 
 indices <- c('NIFTY 100', 'NIFTY MIDCAP 150', 'NIFTY SMLCAP 100')
