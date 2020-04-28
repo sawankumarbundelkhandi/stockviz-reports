@@ -34,7 +34,7 @@ library('kableExtra')
 options(stringsAsFactors = FALSE)
 options("scipen"=100)
 
-source("d:/stockviz/r/config.r")
+source("c:/stockviz/r/config.r")
 
 collPtr <- mongo("dump", url="mongodb://holland:27017/EtfPortfolioDb")
 con <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, "StockVizUS2", ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
