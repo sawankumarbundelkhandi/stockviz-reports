@@ -115,12 +115,15 @@ generateReport <- function(startDate){
 		
 		details<-prot$portfolio[[1]]
 		detailsName <- names(details)
-		if ("AssetType" %in% detailsName && "Identifier" %in% detailsName)
-			syms <- details[details$AssetType == "equity", ]$Identifier
-		else if ("AssetType" %in% detailsName && "Ticker" %in% detailsName)
+		if ("AssetType" %in% detailsName && "Holding Ticker" %in% detailsName) {
+			syms <- details[details$AssetType == "equity", 'Holding Ticker']
+		} else if ("AssetType" %in% detailsName && "Ticker" %in% detailsName) {
 			syms <- details[details$AssetType == "equity", ]$Ticker
-		else
+		} else if ("AssetType" %in% detailsName && "Identifier" %in% detailsName){
+			syms <- details[details$AssetType == "equity", ]$Identifier
+		} else {
 			syms <- details[details$AssetClass == "Equity", ]$Ticker
+		}
 		
 		message(length(syms))
 		
