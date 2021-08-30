@@ -21,6 +21,8 @@ createdDate <- gsub(" 0", " ",format(Sys.Date(), "%B %d, %Y"))
 date: `r createdDate`
 ---
 
+*Looking for pre-canned, scientifically developed, statistically robust strategies? Check out [StockViz](https://stockviz.biz)! *
+
 ```{r, calc_chunk, echo = FALSE, message = FALSE, warning = FALSE}
 
 library('RODBC')
@@ -45,14 +47,16 @@ startDate <- asofDt - 365
 nearBuff <- 0.05
 indices <- c('NIFTY 100', 'NIFTY MIDCAP 150', 'NIFTY SMLCAP 100')
 
-genTables <- function(symbols){
+genTables <- function(syms){
 	at52High <- data.frame(SYMBOL = "")
 	near52High <- data.frame(SYMBOL = "")
 	at52Low <- data.frame(SYMBOL = "")
 	near52Low <- data.frame(SYMBOL = "")
 	
-	for(sym in symbols){
+	for(sym in syms){
 		pxDf <- dbGetQuery(pgCon, "select date_stamp, c from eod_adjusted_nse where ticker = $1 and date_stamp >= $2 and date_stamp <= $3", params=list(sym, startDate, asofDt))
+		if(nrow(pxDf) == 0) next
+		
 		pXts <- xts(pxDf$c, pxDf$date_stamp)
 		
 		if(max(pXts) == as.numeric(last(pXts))){

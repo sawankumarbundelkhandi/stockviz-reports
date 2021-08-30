@@ -21,6 +21,8 @@ createdDate <- gsub(" 0", " ",format(Sys.Date(), "%B %d, %Y"))
 date: `r createdDate`
 ---
 
+*Looking for pre-canned, scientifically developed, statistically robust strategies? Check out [StockViz](https://stockviz.biz)! *
+
 ```{r, calc_chunk, echo = FALSE, message = FALSE, warning = FALSE}
 
 library('RODBC')
