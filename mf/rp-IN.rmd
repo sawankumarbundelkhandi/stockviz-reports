@@ -39,7 +39,7 @@ source("c:/stockviz/r/config.r")
 lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, ldbname, ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 
 asofDt<-sqlQuery(lcon, "select max(as_of) from mf_nav_history")[[1]]
-startDate <- as.Date("2018-01-01")
+startDate <- Sys.Date() - 5*365
 
 analyzeFunds <- function(schemeCodes, indices){
 	retXts <- NULL
