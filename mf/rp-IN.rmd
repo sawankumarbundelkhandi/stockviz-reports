@@ -112,7 +112,7 @@ largecapFunds <- largecapFunds[largecapFunds$stdt <= startDate+180 & largecapFun
 largemfDT <- analyzeFunds(largecapFunds$scheme_code, c('NIFTY 100 TR', 'NIFTY100 QUALITY 30 TR', 'NIFTY500 VALUE 50 TR'))
 
 midcapFunds <- sqlQuery(lcon, sprintf("select scheme_code, min(as_of) stdt, max(as_of) ltdt from mf_nav_history where 
-										scheme_name like '%%mid%%cap%%direct%%' 
+										scheme_name like '%%mid%%direct%%' 
 										and scheme_name like '%%growth%%' 
 										and scheme_name not like '%%idcw%%' 
 										and scheme_name not like '%%bonus%%' 
