@@ -3,7 +3,7 @@ library('rmarkdown')
 
 Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/Pandoc")
 
-source("C:/stockviz/r/config.r")
+source("D:/stockviz/r/config.r")
 
 lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, ldbname, ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 
@@ -40,16 +40,20 @@ print("rendering master page...")
 
 render("rp-IN.Rmd", output_file="rp-IN.html", params=list(LARGECAP_SCHEME_CODES = largecapFunds$scheme_code, MIDCAP_SCHEME_CODES = midcapFunds$scheme_code, ST_DT = startDate, ASOF_DT = asofDt))
 
-q()
+#q()
 
 print("rendering large caps...")
 for(sc in largecapFunds$scheme_code){
 	print(paste(sc, 'LARGECAP'))
-	render("rp-mf.Rmd", output_file=paste0("analysis/rp-", sc, ".html"), params=list(scheme_code = sc, benchmark = 'LARGECAP'))
+	tryCatch({
+		render("rp-mf.Rmd", output_file=paste0("analysis/rp-", sc, ".html"), params=list(scheme_code = sc, benchmark = 'LARGECAP'))
+	}, error=function(e){print(e)})
 }
 
 print("rendering midcaps caps...")
 for(sc in midcapFunds$scheme_code){
 	print(paste(sc, 'MIDCAP'))
-	render("rp-mf.Rmd", output_file=paste0("analysis/rp-", sc, ".html"), params=list(scheme_code = sc, benchmark = 'MIDCAP'))
+	tryCatch({
+		render("rp-mf.Rmd", output_file=paste0("analysis/rp-", sc, ".html"), params=list(scheme_code = sc, benchmark = 'MIDCAP'))
+	}, error=function(e){print(e)})
 }
