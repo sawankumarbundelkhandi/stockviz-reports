@@ -9,6 +9,11 @@ output:
     highlight: tango
     includes:
         in_header: header.html
+params:
+  LARGECAP_SCHEME_CODES: c()
+  MIDCAP_SCHEME_CODES: c()	
+  ST_DT: Sys.Date() - 5*365
+  ASOF_DT: Sys.Date()
 ---
 
 ```{r dt_chunk, include=FALSE}
@@ -34,12 +39,13 @@ library('DT')
 options(stringsAsFactors = FALSE)
 options("scipen"=100)
 
-source("c:/stockviz/r/config.r")
+source("C:/stockviz/r/config.r")
 
 lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, ldbname, ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 
 asofDt<-sqlQuery(lcon, "select max(as_of) from mf_nav_history")[[1]]
 startDate <- Sys.Date() - 5*365
+benchmark_indices <- list(LARGECAP = c('NIFTY 100 TR', 'NIFTY100 QUALITY 30 TR', 'NIFTY500 VALUE 50 TR'), MIDCAP = c('NIFTY MIDCAP 150 TR', 'NIFTY MIDCAP150 QUALITY 50 TR', 'NIFTY500 VALUE 50 TR'))
 
 analyzeFunds <- function(schemeCodes, indices){
 	retXts <- NULL
@@ -78,11 +84,12 @@ analyzeFunds <- function(schemeCodes, indices){
 			names(allXts) <- c('A', benchNames)
 			
 			linearFit <- lm(formula(paste0("A ~ ", paste(benchNames, collapse='+'))), data.frame(allXts))
-			lmCoeffs <- c(round(as.numeric(linearFit$coeff), 5), round(100*summary(linearFit)$adj.r.squared, 0))
+			#summary(linearFit)$adj.r.squared
+			lmCoeffs <- c(round(as.numeric(linearFit$coeff), 5), sprintf('<a href="/analysis/rp-%s.html" target="_blank">#!</a>', schemeCodes[mfIndex]))
 			
 			mfFits <- rbind.data.frame(mfFits, lmCoeffs)
 		}
-		names(mfFits) <- c('ALPHA', indices[1:benchIndex], 'ar2%')
+		names(mfFits) <- c('ALPHA', indices[1:benchIndex], 'more')
 		mfFits$FUND <- fundNames
 		
 		fitList <- append(fitList, list(mfFits))
@@ -91,39 +98,14 @@ analyzeFunds <- function(schemeCodes, indices){
 	mfDT <- list()
 	for(i in 1:length(fitList)){
 		X <- fitList[[i]]
-		mfDT[[i]] <- datatable(X[, c(ncol(X), 1:(ncol(X)-1))], rownames = F, class = 'cell-border stripe', filter='none', options = list(dom = 't', pageLength = 30))
+		mfDT[[i]] <- datatable(X[, c(ncol(X), 1:(ncol(X)-1))], rownames = F, escape = c(rep(T, ncol(X)-1), F), class = 'cell-border stripe', filter='none', options = list(dom = 't', pageLength = 30))
 	}
 	
 	return(mfDT)
 }
 
-largecapFunds <- sqlQuery(lcon, sprintf("select scheme_code, min(as_of) stdt, max(as_of) ltdt from mf_nav_history where 
-										scheme_name like '%%large%%direct%%' 
-										and scheme_name like '%%growth%%' 
-										and scheme_name not like '%%idcw%%' 
-										and scheme_name not like '%%bonus%%' 
-										and scheme_name not like '%%mid%%' 
-										and scheme_name not like '%%small%%' 
-										and scheme_name not like '%%tax%%' 
-										and as_of >= '%s' 
-										group by scheme_code", startDate))
-largecapFunds <- largecapFunds[largecapFunds$stdt <= startDate+180 & largecapFunds$ltdt >= asofDt-5,]
-
-largemfDT <- analyzeFunds(largecapFunds$scheme_code, c('NIFTY 100 TR', 'NIFTY100 QUALITY 30 TR', 'NIFTY500 VALUE 50 TR'))
-
-midcapFunds <- sqlQuery(lcon, sprintf("select scheme_code, min(as_of) stdt, max(as_of) ltdt from mf_nav_history where 
-										scheme_name like '%%mid%%direct%%' 
-										and scheme_name like '%%growth%%' 
-										and scheme_name not like '%%idcw%%' 
-										and scheme_name not like '%%bonus%%' 
-										and scheme_name not like '%%large%%' 
-										and scheme_name not like '%%small%%' 
-										and scheme_name not like '%%tax%%' 
-										and as_of >= '%s' 
-										group by scheme_code", startDate))
-midcapFunds <- midcapFunds[midcapFunds$stdt <= startDate+180 & midcapFunds$ltdt >= asofDt-5,]
-
-midmfDT <- analyzeFunds(midcapFunds$scheme_code, c('NIFTY MIDCAP 150 TR', 'NIFTY MIDCAP150 QUALITY 50 TR', 'NIFTY500 VALUE 50 TR'))
+largemfDT <- analyzeFunds(params$LARGECAP_SCHEME_CODES, benchmark_indices[['LARGECAP']])
+midmfDT <- analyzeFunds(params$MIDCAP_SCHEME_CODES, benchmark_indices[['MIDCAP']])
 
 ```{r, large_cap_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE}
 cat("### Large-cap Funds", "\n")
