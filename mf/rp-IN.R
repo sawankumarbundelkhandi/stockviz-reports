@@ -3,7 +3,7 @@ library('rmarkdown')
 
 Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/Pandoc")
 
-source("D:/stockviz/r/config.r")
+source("C:/stockviz/r/config.r")
 
 lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, ldbname, ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 
