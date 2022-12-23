@@ -85,7 +85,7 @@ analyzeFunds <- function(schemeCodes, indices){
 			
 			linearFit <- lm(formula(paste0("A ~ ", paste(benchNames, collapse='+'))), data.frame(allXts))
 			#summary(linearFit)$adj.r.squared
-			lmCoeffs <- c(round(as.numeric(linearFit$coeff), 5), sprintf('<a href="/analysis/rp-%s.html" target="_blank">#!</a>', schemeCodes[mfIndex]))
+			lmCoeffs <- c(round(as.numeric(linearFit$coeff), 5), sprintf('<a href="/reports/mf/analysis/rp-%s.html" target="_blank">>>></a>', schemeCodes[mfIndex]))
 			
 			mfFits <- rbind.data.frame(mfFits, lmCoeffs)
 		}

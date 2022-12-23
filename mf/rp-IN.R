@@ -40,7 +40,7 @@ print("rendering master page...")
 
 render("rp-IN.Rmd", output_file="rp-IN.html", params=list(LARGECAP_SCHEME_CODES = largecapFunds$scheme_code, MIDCAP_SCHEME_CODES = midcapFunds$scheme_code, ST_DT = startDate, ASOF_DT = asofDt))
 
-#q()
+q()
 
 print("rendering large caps...")
 for(sc in largecapFunds$scheme_code){
