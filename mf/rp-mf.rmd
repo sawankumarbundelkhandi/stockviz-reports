@@ -16,6 +16,7 @@ output:
 ```{r, init_chunk, echo = FALSE, message = FALSE, warning = FALSE}
 createdDate <- gsub(" 0", " ",format(Sys.Date(), "%B %d, %Y"))
 reportPath <- "/analysis"
+idPath <- "."
 
 library('RODBC')
 library('quantmod')
@@ -29,13 +30,24 @@ library('viridis')
 library('DT')
 library('ggrepel')
 
+library('scales')
+library('sysfonts')
+library('showtext')
+library('ggradar') # remotes::install_github("ricardo-bion/ggradar")
+
+font_add_google("Kanit", "kanit")
+#font_add_google("Lobster Two", "lobstertwo")
+font_add_google("Roboto", "roboto")
+showtext_auto()
+
 options(stringsAsFactors = FALSE)
 options("scipen"=100)
 
 benchmark_indices <- list(LARGECAP = c('NIFTY 100 TR', 'NIFTY100 QUALITY 30 TR', 'NIFTY500 VALUE 50 TR'), MIDCAP = c('NIFTY MIDCAP 150 TR', 'NIFTY MIDCAP150 QUALITY 50 TR', 'NIFTY500 VALUE 50 TR'))
 
 schemeCode <- params$scheme_code
-indices <- benchmark_indices[[params$benchmark]]
+benchMark <- params$benchmark
+indices <- benchmark_indices[[benchMark]]
 
 source("C:/stockviz/r/config.r")
 
@@ -153,19 +165,6 @@ for(benchIndex in 1:length(indices)){
 
 ```
 
-```{r, metrics_chunk, echo = FALSE, message = FALSE, warning = FALSE}
-metrics <- data.frame(METRIC = "", VAL=0.0)
-metrics <- rbind(metrics, c("CAPM BETA", as.numeric(CAPM.beta(retWeekly, iRetWeekly[,1]))))
-metrics <- rbind(metrics, c("SHARPE RATIO", as.numeric(SharpeRatio.annualized(retWeekly, Rf=0.0001))))
-metrics <- rbind(metrics, c("INFORMATION RATIO", as.numeric(InformationRatio(retWeekly, iRetWeekly[,1]))))
-metrics <- rbind(metrics, c("KELLY RATIO (half)", as.numeric(KellyRatio(retWeekly, Rf=0.0001))))
-metrics <- rbind(metrics, c("MARTIN RATIO", as.numeric(MartinRatio(retWeekly, Rf=0.0001))))
-metrics <- rbind(metrics, c("VaR", as.numeric(VaR(retWeekly))))
-metrics <- rbind(metrics, c("UPSIDE POTENTIAL RATIO", as.numeric(UpsidePotentialRatio(retWeekly))))
-metrics <- metrics[-1,]
-metrics$VAL <- sprintf("%.5f", as.numeric(metrics$VAL))
-```
-
 ```{r, returns_chart_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE, fig.height=6, fig.width=12}
 cat("\n\n### Annual Returns", "\n\n")
 print(annRetPlot)
@@ -175,11 +174,81 @@ cat("\n\n### Drawdowns", "\n\n")
 print(drawdownChart)
 ```
 
-```{r, metrics_table_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE}
-cat("\n\n\n### Performance Metrics", "\n\n")
-mfMetricsDT <- datatable(metrics, rownames = F, class = 'cell-border stripe', filter='none', colnames = rep("", ncol(metrics)), options = list(dom = 't', pageLength = 30, ordering=F))
+```{r, metrics_radar_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE, fig.height=12, fig.width=12}
+load(paste0(idPath, "/midcapFunds.RData"))
+load(paste0(idPath, "/largecapFunds.RData"))
+metricMap <- read.csv(paste0(idPath, "/metric_map.csv"))
+
+if (benchMark == 'LARGECAP'){
+	schemeCodes <- paste(largecapFunds$scheme_code, collapse=",")
+} else if (benchMark == 'MIDCAP'){
+	schemeCodes <- paste(midcapFunds$scheme_code, collapse=",")
+}
+
+statsDf <- sqlQuery(lcon, sprintf("select SCHEME_CODE, ID, VAL from MF_CAPM where SCHEME_CODE in (%s)", schemeCodes)) 
+
+rankTibs <- statsDf %>% 
+	pivot_wider(names_from=ID, values_from=VAL) %>% 
+	mutate(BETA = ifelse(BETA == 0, 0.0001, BETA)) %>% 
+	mutate(BETA = 1/BETA) %>% 
+	mutate_at(vars(-SCHEME_CODE), rank) 
+
+metricDf <- statsDf %>% filter(SCHEME_CODE == schemeCode) %>%
+	inner_join(rankTibs %>% filter(SCHEME_CODE == schemeCode) %>% pivot_longer(!SCHEME_CODE, names_to='ID', values_to='VAL') %>% select(ID, VAL), by='ID') %>%
+	inner_join(metricMap, by='ID') %>%
+	mutate(METRIC = paste0(DESC, ' (', ID, ')'), VAL = round(VAL.x, 5)) %>%
+	rename(SCORE = VAL.y) %>%
+	select(METRIC, VAL, SCORE) %>%
+	as.data.frame()
+
+cat("\n\n\n### Performance Metrics")
+mfMetricsDT <- datatable(metricDf, rownames = F, class = 'cell-border stripe', filter='none', colnames = c("", names(metricDf)[-1]), options = list(dom = 't', pageLength = 30, ordering=F))
 htmltools::tagList(print(mfMetricsDT))
+
+statsTibs <- statsDf %>% 
+	pivot_wider(names_from=ID, values_from=VAL) %>% 
+	mutate(BETA = ifelse(BETA == 0, 0.0001, BETA)) %>% 
+	mutate(BETA = 1/BETA) %>% 
+	mutate_at(vars(-SCHEME_CODE), rescale)
+				
+avgTibs <- statsTibs %>% summarize_at(vars(-SCHEME_CODE), mean) %>% mutate(SCHEME_CODE='Average')
+
+toPlot <- statsTibs %>% filter(SCHEME_CODE==schemeCode) %>% mutate(SCHEME_CODE = 'MF') %>% bind_rows(avgTibs) %>% as.data.frame()
+			
+rplot <- ggradar(plot.data = toPlot,
+		font.radar = "roboto",
+		grid.label.size = 5,  # Affects the grid annotations (0%, 50%, etc.)
+		axis.label.size = 8, # Afftects the names of the variables
+		group.point.size = 3   # Simply the size of the point 
+	  ) +
+	labs(title = schemeName, tag=paste("@StockViz", asofDt)) + 
+	theme(
+	  plot.background = element_rect(fill = "#fbf9f4", color = "#fbf9f4"),
+	  panel.background = element_rect(fill = "#fbf9f4", color = "#fbf9f4"),
+	  plot.title.position = "plot", # slightly different from default
+	  plot.title = element_text(
+			family = "noto", 
+			size = 38,
+			color = "#2a475e"
+		),
+	  plot.tag = element_text(
+			family = "kanit", 
+			size = 16,
+			color = "lightgrey",
+		),
+	  plot.tag.position = "bottom"
+	) +
+	theme(
+		legend.position = c(1, 0),  
+		legend.justification = c(1, 0),
+		legend.text = element_text(size = 24, family = "roboto"),
+		legend.key = element_rect(fill = NA, color = NA),
+		legend.background = element_blank()
+	)
+	
+print(rplot)
 ```
+
 ```{r, lm_chart_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE, fig.height=7, fig.width=12}
 cat("\n\n\n### Rolling Linear Regression", "\n\n")
 for(benchIndex in 1:length(indices)){

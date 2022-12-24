@@ -9,11 +9,6 @@ output:
     highlight: tango
     includes:
         in_header: header.html
-params:
-  LARGECAP_SCHEME_CODES: c()
-  MIDCAP_SCHEME_CODES: c()	
-  ST_DT: Sys.Date() - 5*365
-  ASOF_DT: Sys.Date()
 ---
 
 ```{r dt_chunk, include=FALSE}
@@ -27,6 +22,12 @@ date: `r createdDate`
 ---
 
 ```{r, calc_chunk, echo = FALSE, message = FALSE, warning = FALSE}
+idPath <- "."
+load(paste0(idPath, "/midcapFunds.RData"))
+load(paste0(idPath, "/largecapFunds.RData"))
+
+startDate <- min(largecapFunds$stdt, midcapFunds$stdt)
+asofDt<-max(largecapFunds$ltdt, midcapFunds$ltdt)
 
 library('RODBC')
 library('quantmod')
@@ -43,8 +44,6 @@ source("C:/stockviz/r/config.r")
 
 lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, ldbname, ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 
-asofDt<-sqlQuery(lcon, "select max(as_of) from mf_nav_history")[[1]]
-startDate <- Sys.Date() - 5*365
 benchmark_indices <- list(LARGECAP = c('NIFTY 100 TR', 'NIFTY100 QUALITY 30 TR', 'NIFTY500 VALUE 50 TR'), MIDCAP = c('NIFTY MIDCAP 150 TR', 'NIFTY MIDCAP150 QUALITY 50 TR', 'NIFTY500 VALUE 50 TR'))
 
 analyzeFunds <- function(schemeCodes, indices){
@@ -104,8 +103,8 @@ analyzeFunds <- function(schemeCodes, indices){
 	return(mfDT)
 }
 
-largemfDT <- analyzeFunds(params$LARGECAP_SCHEME_CODES, benchmark_indices[['LARGECAP']])
-midmfDT <- analyzeFunds(params$MIDCAP_SCHEME_CODES, benchmark_indices[['MIDCAP']])
+largemfDT <- analyzeFunds(largecapFunds$scheme_code, benchmark_indices[['LARGECAP']])
+midmfDT <- analyzeFunds(midcapFunds$scheme_code, benchmark_indices[['MIDCAP']])
 
 ```{r, large_cap_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE}
 cat("### Large-cap Funds", "\n")

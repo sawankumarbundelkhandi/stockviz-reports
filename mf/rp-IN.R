@@ -24,6 +24,8 @@ largecapFunds <- sqlQuery(lcon, sprintf("select scheme_code, min(as_of) stdt, ma
 										group by scheme_code", startDate))
 largecapFunds <- largecapFunds[largecapFunds$stdt <= startDate+180 & largecapFunds$ltdt >= asofDt-5,]
 
+save(largecapFunds, file="largecapFunds.RData")
+
 midcapFunds <- sqlQuery(lcon, sprintf("select scheme_code, min(as_of) stdt, max(as_of) ltdt from mf_nav_history where 
 										scheme_name like '%%mid%%cap%%direct%%' 
 										and scheme_name like '%%growth%%' 
@@ -36,9 +38,13 @@ midcapFunds <- sqlQuery(lcon, sprintf("select scheme_code, min(as_of) stdt, max(
 										group by scheme_code", startDate))
 midcapFunds <- midcapFunds[midcapFunds$stdt <= startDate+180 & midcapFunds$ltdt >= asofDt-5,]
 
+save(midcapFunds, file="midcapFunds.RData")
+
+#q()
+
 print("rendering master page...")
 
-render("rp-IN.Rmd", output_file="rp-IN.html", params=list(LARGECAP_SCHEME_CODES = largecapFunds$scheme_code, MIDCAP_SCHEME_CODES = midcapFunds$scheme_code, ST_DT = startDate, ASOF_DT = asofDt))
+render("rp-IN.Rmd", output_file="rp-IN.html")
 
 #q()
 
