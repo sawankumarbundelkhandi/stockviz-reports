@@ -21,6 +21,8 @@ createdDate <- gsub(" 0", " ",format(Sys.Date(), "%B %d, %Y"))
 date: `r createdDate`
 ---
 
+*Questions? Ask here: [The Alpha Bet](https://stockviz.substack.com/p/the-alpha-bet)! *
+
 ```{r, calc_chunk, echo = FALSE, message = FALSE, warning = FALSE}
 idPath <- "."
 load(paste0(idPath, "/midcapFunds.RData"))

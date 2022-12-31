@@ -254,5 +254,7 @@ cat("\n\n\n### Rolling Linear Regression", "\n\n")
 for(benchIndex in 1:length(indices)){
 	print(rollingPlots[[benchIndex]])
 }
-
+cat("\n\n\n\n")
 ```
+
+*Looking for pre-canned, scientifically developed, statistically robust strategies? Check out [StockViz](https://stockviz.biz)! *
