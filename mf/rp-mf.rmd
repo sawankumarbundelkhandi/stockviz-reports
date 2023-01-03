@@ -187,6 +187,8 @@ if (benchMark == 'LARGECAP'){
 
 statsDf <- sqlQuery(lcon, sprintf("select SCHEME_CODE, ID, VAL from MF_CAPM where SCHEME_CODE in (%s)", schemeCodes)) 
 
+# lower BETA is better
+
 rankTibs <- statsDf %>% 
 	pivot_wider(names_from=ID, values_from=VAL) %>% 
 	mutate(BETA = ifelse(BETA == 0, 0.0001, BETA)) %>% 
