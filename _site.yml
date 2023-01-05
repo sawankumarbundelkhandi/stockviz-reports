@@ -1,0 +1,42 @@
+navbar:
+  title: "StockViz Reports"                            
+  type: inverse
+  left:
+    - text: "52-week H&L"
+      icon: fa-arrows-v
+      menu:
+      - text: "India"
+        href: /reports/52-week-highs-lows/52wk-IN.html
+      - text: "US"
+        href: /reports/52-week-highs-lows/52wk-US.html
+    - text: "All Thime Highs"
+      icon: fa-rocket
+      menu:
+      - text: "India"
+        href: /reports/all-time-highs/ath-IN.html
+      - text: "US"
+        href: /reports/all-time-highs/ath-US.html
+    - text: "Drawdowns"
+      icon: fa-magnet
+      menu:
+      - text: "India"
+        href: /reports/drawdown/drawdowns.html
+      - text: "US"
+        href: /reports/drawdown/drawdowns-US.html 
+    - text: "Streaks"
+      icon: fa-train
+      menu:
+      - text: "India"
+        href: /reports/streaks/rp-IN.html
+      - text: "US"
+        href: /reports/streaks/rp-US.html 
+    - text: "Indian Indices"
+      icon: fa-hand-pointer-o
+      href: /reports/index/rp-IN.html  
+    - text: "Indian Mutual Funds"
+      icon: fa-shopping-bag
+      href: /reports/mf/rp-IN.html
+  right:
+    - icon: fa-home
+      href: https://stockviz.biz
+    

@@ -57,6 +57,8 @@ genTables <- function(symbols){
 		if (nrow(pxDf) == 0) next
 		pXts <- xts(pxDf$c, pxDf$time_stamp)
 		
+		if(nrow(pXts) == 0) next
+		
 		if(max(pXts) == as.numeric(last(pXts))){
 			at52High <- rbind(at52High, c(toString(sym)))
 		} else if (last(coredata(pXts)) >= (1-nearBuff) * max(coredata(pXts))) {
