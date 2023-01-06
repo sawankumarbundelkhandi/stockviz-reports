@@ -32,7 +32,11 @@ navbar:
         href: /reports/streaks/rp-US.html 
     - text: "Indian Indices"
       icon: fa-hand-pointer-o
-      href: /reports/index/rp-IN.html  
+      menu:
+        - text: "Risk Metrics"
+          href: /reports/index/rp-risk.html  
+        - text: "Changes"
+          href: /reports/index/rp-IN.html  
     - text: "Indian Mutual Funds"
       icon: fa-shopping-bag
       href: /reports/mf/rp-IN.html

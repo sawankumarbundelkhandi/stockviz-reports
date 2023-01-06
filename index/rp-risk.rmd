@@ -1,0 +1,50 @@
+---
+title: Index Risk Metrics
+subtitle: StockViz
+editor_options:
+  chunk_output_type: console
+output: 
+  html_document:
+    theme: flatly
+    highlight: tango
+    includes:
+        in_header: header.html
+---
+
+```{r, init_chunk, echo = FALSE, message = FALSE, warning = FALSE}
+library('RODBC')
+library('tidyverse')
+library('DT')
+
+source("C:/stockviz/r/config.r")
+
+options("scipen"=100)
+options(stringsAsFactors = FALSE)
+
+createdDate <- gsub(" 0", " ",format(Sys.Date(), "%B %d, %Y"))
+
+lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, ldbname, ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
+	
+```
+
+---
+date: `r createdDate`
+---
+
+```{r, metrics_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE, fig.height=12, fig.width=12}
+maxDt <- sqlQuery(lcon, "select max(time_stamp) from bhav_index")[[1]]
+
+indices <- sqlQuery(lcon, sprintf("select distinct index_name from index_capm where time_stamp = '%s'", maxDt))[,1]
+
+statsDf <- sqlQuery(lcon, sprintf("select INDEX_NAME, ID, VAL from INDEX_CAPM where INDEX_NAME in ('%s')", paste(indices, collapse="','"))) 
+
+rankTibs <- statsDf %>% 
+	pivot_wider(names_from=ID, values_from=VAL) %>% 
+	mutate_at(vars(-INDEX_NAME), rank) %>%
+	mutate(SCORE = rowSums(across(-INDEX_NAME)), more=sprintf('<a href="/reports/index/risk/rp-%s.html" target="_blank">>>></a>', gsub("[^[:alnum:] ]| ", "", INDEX_NAME))) %>%
+	arrange(desc(SCORE))
+	
+inMetricsDT <- datatable(rankTibs, rownames = F, class = 'cell-border stripe', escape = c(rep(T, ncol(rankTibs)-1), F), filter='none', colnames = c("", names(rankTibs)[-1]), options = list(dom = 't', pageLength = nrow(rankTibs)))
+htmltools::tagList(print(inMetricsDT))
+
+```
