@@ -100,7 +100,7 @@ for(i in 1:(length(years)-1)){
 	yrSeries <- iXts[toString(yr)]
 	drets <- dailyReturn(yrSeries)
 	icol <- cumprod(1+drets)
-	dcol<-as.Date(sprintf("2000-%s", strftime(index(yrSeries), "%m-%d")))
+	dcol<-as.Date(sprintf("2000-%s", strftime(index(icol), "%m-%d")))
 	dailyByYrXts <- merge.xts(dailyByYrXts, xts(icol, dcol))
 	annualRets <- rbind(annualRets, c(yr, as.numeric(Return.cumulative(drets))))
 }
@@ -213,10 +213,10 @@ htmltools::tagList(print(mfMetricsDT))
 statsTibs <- statsDf %>% 
 	pivot_wider(names_from=ID, values_from=VAL) %>% 
 	mutate_at(vars(-INDEX_NAME), rescale)
-				
+	
 avgTibs <- statsTibs %>% summarize_at(vars(-INDEX_NAME), mean, na.rm=T) %>% mutate(INDEX_NAME='Average')
 
-toPlot <- statsTibs %>% filter(INDEX_NAME==iName) %>% mutate(INDEX_NAME = 'INDEX') %>% bind_rows(avgTibs) %>% as.data.frame()
+toPlot <- statsTibs %>% filter(INDEX_NAME==iName) %>% mutate(INDEX_NAME = 'INDEX') %>% bind_rows(avgTibs) %>% select(where(~!any(is.na(.x)))) %>% as.data.frame()
 			
 rplot <- ggradar(plot.data = toPlot,
 		font.radar = "roboto",
