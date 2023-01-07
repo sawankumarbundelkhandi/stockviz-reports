@@ -41,8 +41,13 @@ statsDf <- sqlQuery(lcon, sprintf("select INDEX_NAME, ID, VAL from INDEX_CAPM wh
 rankTibs <- statsDf %>% 
 	pivot_wider(names_from=ID, values_from=VAL) %>% 
 	mutate_at(vars(-INDEX_NAME), rank) %>%
-	mutate(SCORE = rowSums(across(-INDEX_NAME)), more=sprintf('<a href="/reports/index/risk/rp-%s.html" target="_blank">>>></a>', gsub("[^[:alnum:] ]| ", "", INDEX_NAME))) %>%
+	mutate(SCORE = rowSums(across(-INDEX_NAME))) %>%
 	arrange(desc(SCORE))
+	
+rankTibs <- rankTibs %>%
+	mutate(more = ifelse(file.exists(sprintf("risk/rp-%s.html", gsub("[^[:alnum:] ]| ", "", INDEX_NAME))), 
+						sprintf('<a href="/reports/index/risk/rp-%s.html" target="_blank">>>></a>', gsub("[^[:alnum:] ]| ", "", INDEX_NAME)), 
+						""))
 	
 inMetricsDT <- datatable(rankTibs, rownames = F, class = 'cell-border stripe', escape = c(rep(T, ncol(rankTibs)-1), F), filter='none', colnames = c("", names(rankTibs)[-1]), options = list(dom = 't', pageLength = nrow(rankTibs)))
 htmltools::tagList(print(inMetricsDT))

@@ -14,17 +14,20 @@ maxDt <- sqlQuery(lcon, "select max(time_stamp) from bhav_index")[[1]]
 
 indices <- sqlQuery(lcon, sprintf("select distinct index_name from index_capm where time_stamp = '%s'", maxDt))[,1]
 
+#render("rp-risk.Rmd", output_file="rp-risk.html")
+#q()
+
 print("rendering indices...")
 for(i in 1:length(indices)){
 	
 	iName <- indices[i]
 	fName <- gsub("[^[:alnum:] ]| ", "", iName)
 	
+	print(iName)
 	tryCatch({
 		render("rp-index-risk.Rmd", output_file=paste0("risk/rp-", fName, ".html"), params=list(index_name = iName))
 	}, error=function(e){print(e)})
 }
-
 
 print("rendering master page...")
 

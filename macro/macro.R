@@ -1,0 +1,5 @@
+library(rmarkdown)
+Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/Pandoc")
+render("commodities/rp-cmdy.Rmd", output_file="rp-cmdy.html")
+render("bonds/rp-bnd.Rmd", output_file="rp-bnd.html")
+render("currencies/rp-cur.Rmd", output_file="rp-cur.html")

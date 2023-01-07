@@ -2,6 +2,15 @@ navbar:
   title: "StockViz Reports"                            
   type: inverse
   left:
+    - text: "Macro"
+      icon: fa-globe
+      menu:
+      - text: "Fixed Income"
+        href: /reports/macro/bonds/rp-bnd.html
+      - text: "Currencies"
+        href: /reports/macro/commodities/rp-cmdy.html
+      - text: "Commodities"
+        href: /reports/macro/currencies/rp-cur.html
     - text: "52-week H&L"
       icon: fa-arrows-v
       menu:
