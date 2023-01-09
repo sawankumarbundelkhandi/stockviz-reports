@@ -41,6 +41,7 @@ options("scipen"=100)
 options(stringsAsFactors = FALSE)
 
 source("C:/stockviz/r/config.r")
+source("../../common/fan-chart.R")
 
 lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, "StockViz", ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 lconUs <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, "StockVizUs", ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
@@ -50,100 +51,16 @@ pgCon <- dbConnect(RPostgres::Postgres(), host='sweden', user=ldbuser2, password
 ```
 
 ```{r, inr_fan_chunk, echo = FALSE, message = FALSE, warning = FALSE}
-iName <- "INR"
-fanDf <- dbGetQuery(pgCon, "select px_close c, time_stamp from av_fx_usd_daily_ts where curr_code=$1 and time_stamp >= $2", params=list(iName, "2009-12-25"))
+
+fanDf <- dbGetQuery(pgCon, "select px_close c, time_stamp from av_fx_usd_daily_ts where curr_code=$1 and time_stamp >= $2", params=list("INR", "2009-12-25"))
 
 endDt <- last(fanDf$time_stamp)
 fredCutoff <- fanDf$time_stamp[1]
 fanDf2 <- sqlQuery(lconUs, sprintf("select val c, time_stamp from FRED_OBSERVATION where SERIES_ID=-2147478748 and time_stamp >= '%s' and time_stamp < '%s'", "2009-12-25", fredCutoff))
 
 fanDf <- rbind(fanDf, fanDf2)
-pXts <- xts(fanDf[,1], fanDf[,2])
 
-years <- fanDf %>% mutate(Y = year(time_stamp)) %>% group_by(Y) %>% summarize(ctr = n()) %>% filter(ctr > 210) %>% select(Y) %>% arrange(Y)
-years <- years$Y
-
-annualRets <- data.frame(Y=0, R=0.0)
-dailyByYrXts<-NULL
-for(i in 1:(length(years)-1)){
-	yr<-years[i]
-	yrSeries <- pXts[toString(yr)]
-	drets <- dailyReturn(yrSeries)
-	icol <- cumprod(1+drets)
-	dcol<-as.Date(sprintf("2000-%s", strftime(index(icol), "%m-%d")))
-	dailyByYrXts <- merge.xts(dailyByYrXts, xts(icol, dcol))
-	annualRets <- rbind(annualRets, c(yr, as.numeric(Return.cumulative(drets))))
-}
-dailyByYrXts<-na.locf(dailyByYrXts)
-
-annualRets <- annualRets[-1,]
-annualRets$Y <- as.integer(annualRets$Y)
-annualRets$R <- as.numeric(annualRets$R)
-
-i<-length(years)
-yr<-years[i]
-
-yrSeries <- pXts[toString(yr)]
-drets <- dailyReturn(yrSeries)
-icol <- cumprod(1+drets)
-dcol<-as.Date(sprintf("2000-%s", strftime(index(yrSeries), "%m-%d")))
-lastCol <- xts(icol, dcol)
-dailyByYrXts <- merge.xts(dailyByYrXts, lastCol)
-dailyByYrXts[sprintf("%s/%s", first(index(lastCol)), last(index(lastCol))), ncol(dailyByYrXts)] <- na.locf(dailyByYrXts[sprintf("%s/%s", first(index(lastCol)), last(index(lastCol))), ncol(dailyByYrXts)])
-
-names(dailyByYrXts) <- sapply(years, function(X) toString(X))
-
-dailyByYear <- data.frame(dailyByYrXts)
-dailyByYear$T <- index(dailyByYrXts)
-
-toPlot <- melt(dailyByYear, id='T')
-toPlot$variable <- gsub("X", "", as.character(toPlot$variable))
-#toPlot$T <- factor(toPlot$T, levels=unique(toPlot$T))
-
-greys <- colorRampPalette(c("#FFFDD0", "black"))(length(years))
-toPlot$color <- greys[as.integer(toPlot$variable) - min(years) + 1]
-toPlot$sz <- (as.integer(toPlot$variable) - min(years) + 1)/(2*length(years))
-toPlot[toPlot$variable == toString(max(years)),]$sz <- 1.5
-
-minYr <- annualRets[annualRets$R == min(annualRets$R),1]
-maxYr <- annualRets[annualRets$R == max(annualRets$R),1]
-
-minYr2 <- annualRets[annualRets$R == min(annualRets[annualRets$R > min(annualRets$R),2]), 1]
-maxYr2 <- annualRets[annualRets$R == max(annualRets[annualRets$R < max(annualRets$R),2]), 1]
-
-toPlot[as.integer(toPlot$variable) == minYr,]$sz <- 1
-toPlot[as.integer(toPlot$variable) == maxYr,]$sz <- 1
-
-toPlot[as.integer(toPlot$variable) == minYr2,]$sz <- 0.75
-toPlot[as.integer(toPlot$variable) == maxYr2,]$sz <- 0.75
-
-toPlot[as.integer(toPlot$variable) == minYr,]$color <- "darkred"
-toPlot[as.integer(toPlot$variable) == maxYr,]$color <- "darkgreen"
-
-toPlot[as.integer(toPlot$variable) == minYr2,]$color <- "darkred"
-toPlot[as.integer(toPlot$variable) == maxYr2,]$color <- "darkgreen"
-
-toPlot$label <- NA
-toPlot[as.integer(toPlot$variable) == minYr,]$label[nrow(toPlot[as.integer(toPlot$variable) == minYr,])] <- minYr
-toPlot[as.integer(toPlot$variable) == maxYr,]$label[nrow(toPlot[as.integer(toPlot$variable) == maxYr,])] <- maxYr
-toPlot[as.integer(toPlot$variable) == minYr2,]$label[nrow(toPlot[as.integer(toPlot$variable) == minYr2,])] <- minYr2
-toPlot[as.integer(toPlot$variable) == maxYr2,]$label[nrow(toPlot[as.integer(toPlot$variable) == maxYr2,])] <- maxYr2
-toPlot[as.integer(toPlot$variable) == max(years) & !is.na(toPlot$value),]$label[nrow(toPlot[as.integer(toPlot$variable) == max(years) & !is.na(toPlot$value),])] <- max(years)
-
-dateBreaks <- index(dailyByYrXts)
-day(dateBreaks) <- days_in_month(dateBreaks)
-dateBreaks <- unique(dateBreaks)
-
-inrFanPlot <- ggplot(toPlot, aes(x=T, y=value, group=variable)) +
-	theme_economist() +
-	theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-	geom_line(aes(color=color, size=sz)) +
-	scale_color_identity() +
-	scale_size_identity() +
-	scale_x_date(breaks = dateBreaks, date_labels="%b-%d", expand=c(0, 0)) +
-	geom_label_repel(aes(label = label), alpha=0.5) +
-	labs(x='', y='growth of Rs. 1', title="USDINR Trajectories", subtitle=sprintf("%d:%s", min(years), endDt)) +
-	annotate("text", x=toPlot$T[1], y=min(toPlot$value, na.rm=T), label = "@StockViz", hjust=0, vjust=0, col="white", cex=6, fontface = "bold", alpha = 0.8)
+inrFanPlot <- common.CreateFanChart(fanDf, "USDINR", sprintf("%d:%s", min(year(fanDf$time_stamp)), max(fanDf$time_stamp)))
 
 ```
 
