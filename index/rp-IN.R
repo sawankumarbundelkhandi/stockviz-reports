@@ -6,6 +6,7 @@ library('lubridate')
 Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/Pandoc")
 
 source("C:/stockviz/r/config.r")
+libPath <- "C:/StockViz/public/reports/rmdlibs"
 
 options("scipen"=100)
 options(stringsAsFactors = FALSE)
@@ -47,7 +48,7 @@ for(i in 1:nrow(changeLog)){
 	changeLog$REPORT_UPDATE_DATE[i] <- Sys.Date()
 	
 	tryCatch({
-		render("rp-index.Rmd", output_file=paste0("analysis/rp-", changeLog$INAME[i], ".html"), params=list(index_name = changeLog$INDEX_NAME[i]))
+		render("rp-index.Rmd", output_file=paste0("analysis/rp-", changeLog$INAME[i], ".html"), params=list(index_name = changeLog$INDEX_NAME[i]), output_options=list(html_document = list(self_contained = FALSE, lib_dir = libPath)))
 	}, error=function(e){print(e)})
 }
 
@@ -55,4 +56,4 @@ save(changeLog, file="changeLog.RData")
 
 print("rendering master page...")
 
-render("rp-IN.Rmd", output_file="rp-IN.html")
+render("rp-IN.Rmd", output_file="rp-IN.html", output_options=list(html_document = list(self_contained = FALSE, lib_dir = libPath)))
