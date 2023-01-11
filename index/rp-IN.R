@@ -6,7 +6,6 @@ library('lubridate')
 Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/Pandoc")
 
 source("C:/stockviz/r/config.r")
-libPath <- "C:/StockViz/public/reports/rmdlibs"
 
 options("scipen"=100)
 options(stringsAsFactors = FALSE)
@@ -38,7 +37,7 @@ changeLog <- indices %>% full_join(changeLog, by='INDEX_NAME') %>%
 							select(INDEX_NAME, INDEX_CHANGE_DATE, REPORT_UPDATE_DATE, INAME) %>% 
 							as.data.frame()
 
-print(changeLog)
+#print(changeLog)
 							
 for(i in 1:nrow(changeLog)){
 	#print(changeLog[i,])
@@ -48,7 +47,9 @@ for(i in 1:nrow(changeLog)){
 	changeLog$REPORT_UPDATE_DATE[i] <- Sys.Date()
 	
 	tryCatch({
-		render("rp-index.Rmd", output_file=paste0("analysis/rp-", changeLog$INAME[i], ".html"), params=list(index_name = changeLog$INDEX_NAME[i]), output_options=list(html_document = list(self_contained = FALSE, lib_dir = libPath)))
+		render("analysis/rp-index.Rmd", 
+					output_file=paste0("rp-", changeLog$INAME[i], ".html"), 
+					params=list(index_name = changeLog$INDEX_NAME[i]))
 	}, error=function(e){print(e)})
 }
 
@@ -56,4 +57,4 @@ save(changeLog, file="changeLog.RData")
 
 print("rendering master page...")
 
-render("rp-IN.Rmd", output_file="rp-IN.html", output_options=list(html_document = list(self_contained = FALSE, lib_dir = libPath)))
+render("rp-IN.Rmd", output_file="rp-IN.html")

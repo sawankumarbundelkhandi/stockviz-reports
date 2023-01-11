@@ -7,6 +7,8 @@ output:
   html_document:
     theme: flatly
     highlight: tango
+    self_contained: false
+    lib_dir: risk/rmdlib
     includes:
         in_header: header.html
 ---
@@ -32,7 +34,7 @@ date: `r createdDate`
 ---
 
 ```{r, metrics_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE, fig.height=12, fig.width=12}
-maxDt <- sqlQuery(lcon, "select max(time_stamp) from bhav_index")[[1]]
+maxDt <- sqlQuery(lcon, "select max(time_stamp) from index_capm")[[1]]
 
 indices <- sqlQuery(lcon, sprintf("select distinct index_name from index_capm where time_stamp = '%s'", maxDt))[,1]
 
