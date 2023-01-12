@@ -95,7 +95,7 @@ common.CreateFanChart <- function(fanDf, title, subtitle){
 		scale_size_identity() +
 		scale_x_date(breaks = dateBreaks, date_labels="%b-%d", expand=c(0, 0)) +
 		geom_label_repel(aes(label = label), alpha=0.5) +
-		labs(x='', y='growth of Rs. 1', title=title, subtitle=sprintf("%d:%s", min(years), max(toPlot$T))) +
+		labs(x='', y='growth of Rs. 1', title=title, subtitle=subtitle) +
 		annotate("text", x=toPlot$T[1], y=min(toPlot$value, na.rm=T), label = "@StockViz", hjust=0, vjust=0, col="white", cex=6, fontface = "bold", alpha = 0.8)
 		
 	return(fanPlot)

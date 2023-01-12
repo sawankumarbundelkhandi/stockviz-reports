@@ -9,6 +9,8 @@ output:
   html_document:
     theme: flatly
     highlight: tango
+    self_contained: false
+    lib_dir: analysis/rmdlib	
     includes:
         in_header: header.html
 ---

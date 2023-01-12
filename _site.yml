@@ -6,11 +6,11 @@ navbar:
       icon: fa-globe
       menu:
       - text: "Fixed Income"
-        href: /reports/macro/bonds/rp-bnd.html
+        href: /reports/macro/rp-bnd.html
       - text: "Currencies"
-        href: /reports/macro/currencies/rp-cur.html
+        href: /reports/macro/rp-cur.html
       - text: "Commodities"
-        href: /reports/macro/commodities/rp-cmdy.html
+        href: /reports/macro/rp-cmdy.html
     - text: "52-week H&L"
       icon: fa-arrows-v
       menu:
@@ -46,9 +46,15 @@ navbar:
           href: /reports/index/rp-risk.html  
         - text: "Changes"
           href: /reports/index/rp-IN.html  
-    - text: "Indian Mutual Funds"
+    - text: "Funds"
       icon: fa-shopping-bag
-      href: /reports/mf/rp-IN.html
+      menu:
+        - text: "Indian Mutual Funds"
+          href: /reports/mf/rp-IN.html
+        - text: "US ETFs"
+          href: /reports/etf-us/rp-risk.html
+        - text: "Country $ ETFs"
+          href: /reports/etf-us/rp-country.html
   right:
     - icon: fa-home
       href: https://stockviz.biz
