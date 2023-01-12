@@ -4,7 +4,6 @@ library(rmarkdown)
 
 Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/Pandoc")
 source("C:/stockviz/r/config.r")
-libPath <- "C:/StockViz/public/reports/rmdlibs"
 
 options("scipen"=100)
 options(stringsAsFactors = FALSE)
@@ -26,7 +25,7 @@ renderEtfs <- function(){
 		
 		print(iName)
 		tryCatch({
-			render("rp-etf-risk.Rmd", output_file=paste0("risk/rp-", fName, ".html"), params=list(ticker = iName), output_options=list(html_document = list(self_contained = FALSE, lib_dir = libPath)))
+			render("risk/rp-etf-risk.Rmd", output_file=paste0("rp-", fName, ".html"), params=list(ticker = iName))
 		}, error=function(e){print(e)})
 	}
 }
@@ -36,5 +35,5 @@ renderEtfs()
 
 print("rendering master page...")
 
-render("rp-risk.Rmd", output_file="rp-risk.html", output_options=list(html_document = list(self_contained = FALSE, lib_dir = libPath)))
-render("rp-country.Rmd", output_file="rp-country.html", output_options=list(html_document = list(self_contained = FALSE, lib_dir = libPath)))
+render("rp-risk.Rmd", output_file="rp-risk.html")
+render("rp-country.Rmd", output_file="rp-country.html")

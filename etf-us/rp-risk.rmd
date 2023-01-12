@@ -7,6 +7,8 @@ output:
   html_document:
     theme: flatly
     highlight: tango
+    self_contained: false
+    lib_dir: risk/rmdlib
     toc: true
     includes:
         in_header: header.html
