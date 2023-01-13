@@ -13,13 +13,15 @@ startDate <- Sys.Date() - 5*365
 print("subsetting mutual funds...")
 
 largecapFunds <- sqlQuery(lcon, sprintf("select scheme_code, min(as_of) stdt, max(as_of) ltdt from mf_nav_history where 
-										scheme_name like '%%large%%direct%%' 
+										(scheme_name like '%%large%%direct%%' or scheme_name like '%%bluechip%%direct%%')
 										and scheme_name like '%%growth%%' 
 										and scheme_name not like '%%idcw%%' 
 										and scheme_name not like '%%bonus%%' 
 										and scheme_name not like '%%mid%%' 
 										and scheme_name not like '%%small%%' 
 										and scheme_name not like '%%tax%%' 
+										and scheme_name not like '%%emerging%%' 
+										and scheme_name not like '%% US %%'
 										and as_of >= '%s' 
 										group by scheme_code", startDate))
 largecapFunds <- largecapFunds[largecapFunds$stdt <= startDate+180 & largecapFunds$ltdt >= asofDt-5,]
