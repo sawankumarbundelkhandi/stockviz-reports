@@ -15,30 +15,30 @@ navbar:
       icon: fa-arrows-v
       menu:
       - text: "India"
-        href: /reports/52-week-highs-lows/52wk-IN.html
+        href: /reports/eq/52wk-IN.html
       - text: "US"
-        href: /reports/52-week-highs-lows/52wk-US.html
+        href: /reports/eq/52wk-US.html
     - text: "All Thime Highs"
       icon: fa-rocket
       menu:
       - text: "India"
-        href: /reports/all-time-highs/ath-IN.html
+        href: /reports/eq/ath-IN.html
       - text: "US"
-        href: /reports/all-time-highs/ath-US.html
+        href: /reports/eq/ath-US.html
     - text: "Drawdowns"
       icon: fa-magnet
       menu:
       - text: "India"
-        href: /reports/drawdown/drawdowns.html
+        href: /reports/eq/drawdowns-IN.html
       - text: "US"
-        href: /reports/drawdown/drawdowns-US.html 
+        href: /reports/eq/drawdowns-US.html 
     - text: "Streaks"
       icon: fa-train
       menu:
       - text: "India"
-        href: /reports/streaks/rp-IN.html
+        href: /reports/eq/streaks-IN.html
       - text: "US"
-        href: /reports/streaks/rp-US.html 
+        href: /reports/eq/streaks-US.html 
     - text: "Indian Indices"
       icon: fa-hand-pointer-o
       menu:
