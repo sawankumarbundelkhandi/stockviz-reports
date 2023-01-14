@@ -58,4 +58,6 @@ navbar:
   right:
     - icon: fa-home
       href: https://stockviz.biz
+    - icon: fa-envelope-o
+      href: https://stockviz.substack.com
     
