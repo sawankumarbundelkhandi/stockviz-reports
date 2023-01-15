@@ -10,9 +10,9 @@ options(stringsAsFactors = FALSE)
 
 lconUs2 <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, "StockVizUs2", ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 
-render("rp-country.Rmd", output_file="rp-country.html")
-render("rp-risk.Rmd", output_file="rp-risk.html")
-q()
+#render("rp-country.Rmd", output_file="rp-country.html")
+#render("rp-risk.Rmd", output_file="rp-risk.html")
+#q()
 
 maxDt <- sqlQuery(lconUs2, "select max(time_stamp) from EQ_CAPM") [[1]]
 
