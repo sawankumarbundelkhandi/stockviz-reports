@@ -1,6 +1,7 @@
 ---
 params:
   ticker: ""
+  fName: ""
 subtitle: ETF Risk Metrics
 editor_options:
   chunk_output_type: console
@@ -19,59 +20,29 @@ createdDate <- gsub(" 0", " ",format(Sys.Date(), "%B %d, %Y"))
 idPath <- "../../"
 
 library('RODBC')
-library('quantmod')
-library('PerformanceAnalytics')
-
 library('tidyverse')
 library('lubridate')
-library('ggthemes')
-library('reshape2')
-library('viridis')
 library('DT')
-library('ggrepel')
 
 library('scales')
-library('sysfonts')
-library('showtext')
-library('ggradar') # remotes::install_github("ricardo-bion/ggradar")
-
-font_add_google("Kanit", "kanit")
-#font_add_google("Lobster Two", "lobstertwo")
-font_add_google("Roboto", "roboto")
-showtext_auto()
 
 options(stringsAsFactors = FALSE)
 options("scipen"=100)
 
 ticker <- params$ticker
+fName <- params$fName
 
 source("C:/stockviz/r/config.r")
-source("../../common/fan-chart.R")
 
 lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, ldbname, ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 lconUs2 <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, "StockVizUs2", ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 
 etfName <- sqlQuery(lcon, sprintf("select FUND from ETF_META where symbol='%s'", ticker))[[1]]
 
-spyMaxDt <- sqlQuery(lconUs2, "select max(time_stamp) from BHAV_EQ_TD where symbol='SPY'")[[1]]
-etfMaxDate <- sqlQuery(lconUs2, sprintf("select max(time_stamp) from BHAV_EQ_TD where symbol='%s'", ticker))[[1]]
-etfMinDate <- sqlQuery(lconUs2, sprintf("select min(time_stamp) from BHAV_EQ_TD where symbol='%s'", ticker))[[1]]
-
-etfMinDate <- as.Date(sprintf("%d-01-01", year(etfMinDate)+1))
-
-if (etfMaxDate != spyMaxDt){
-	print("STALE ETF!!!")
-	q()
-}
-
-iDf1 <- sqlQuery(lconUs2, sprintf("select c, time_stamp from BHAV_EQ_TD where symbol='%s' and time_stamp >= '%s'", ticker, etfMinDate))
-iXts <- xts(iDf1[,1], iDf1[,2])
-
-retDaily <- dailyReturn(iXts)
-retAnn <- annualReturn(iXts)
-
-names(retDaily) <- c(ticker)
-names(retAnn) <- c(ticker)
+fanPlotName <- paste0("plots/", fName, ".fan.png")
+cumPlotName <- paste0("plots/", fName, ".cumret.png")
+annPlotName <- paste0("plots/", fName, ".annret.png")
+radarPlotName <- paste0("plots/", fName, ".radar.png")
 
 ```
 
@@ -80,41 +51,19 @@ title: `r ticker`
 date: `r createdDate`
 ---
 
-```{r, perf_chunk, echo = FALSE, message = FALSE, warning = FALSE}
-cumRetChart <- chart.CumReturns(retDaily, main = ticker, legend.loc = 'topleft')
-drawdownChart <- chart.Drawdown(retDaily, main = ticker, legend.loc = 'bottomleft')
+## `r etfName`
 
-toPlotAnn <- data.frame(retAnn*100)
-toPlotAnn$Y <- year(index(retAnn))
+### Annual Returns
 
-maxYear <- length(unique(toPlotAnn$Y))
-toPlotAnn <- melt(toPlotAnn, id='Y')
-minRet <- min(toPlotAnn$value)
-toPlotAnn$Y <- factor(toPlotAnn$Y, levels = unique(toPlotAnn$Y))
+![](`r fanPlotName`)
 
-annRetPlot <- ggplot(toPlotAnn, aes(x=Y, y=value, fill=variable)) +
-	theme_economist() +
-	geom_bar(stat = "identity", position = position_dodge()) +
-	geom_text_repel(aes(label = sprintf('%.2f', value)), position = position_dodge(0.9)) +
-	scale_fill_viridis(discrete = TRUE) +
-	labs(x = "Year", y="Returns (%)", fill="", color="", size="", title=sprintf("%s", ticker), subtitle=sprintf("Annual Returns [%s:%s]", first(index(retDaily)), last(index(retDaily)))) +
-	annotate("text", x=maxYear, y=minRet, label = "@StockViz", hjust=1, vjust=0, col="white", cex=6, fontface = "bold", alpha = 0.8)
-	
-fanPlot <- common.CreateFanChart(iDf1, ticker, sprintf("%d:%s", min(year(iDf1$time_stamp)), max(iDf1$time_stamp)))
-	
-```
+![](`r annPlotName`)
 
-```{r, returns_chart_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE, fig.height=6, fig.width=12}
-cat("\n\n## ", etfName, "\n\n")
-cat("\n\n### Annual Returns", "\n\n")
-print(fanPlot)
-cat("\n\n")
-print(annRetPlot)
-cat("\n\n### Cumulative Returns", "\n\n")
-print(cumRetChart)
-cat("\n\n### Drawdowns", "\n\n")
-print(drawdownChart)
-```
+### Cumulative Returns and Drawdowns
+
+![](`r cumPlotName`)
+
+### Performance Metrics
 
 ```{r, metrics_radar_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE, fig.height=12, fig.width=12}
 metricMap <- read.csv(paste0(idPath, "/metric_map.csv"))
@@ -138,49 +87,9 @@ metricDf <- dataDf %>% filter(SYMBOL == ticker) %>%
 	select(METRIC, VAL, SCORE) %>%
 	as.data.frame()
 
-cat("\n\n\n### Performance Metrics")
 mfMetricsDT <- datatable(metricDf, rownames = F, class = 'cell-border stripe', filter='none', colnames = c("", names(metricDf)[-1]), options = list(dom = 't', pageLength = 30, ordering=F))
 htmltools::tagList(print(mfMetricsDT))
 
-statsTibs <- dataDf %>% 
-	pivot_wider(names_from=ID, values_from=VAL) %>% 
-	mutate_at(vars(-SYMBOL), rescale)
-				
-avgTibs <- statsTibs %>% summarize_at(vars(-SYMBOL), mean, na.rm=T) %>% mutate(SYMBOL='Average')
-
-toPlot <- statsTibs %>% filter(SYMBOL==ticker) %>% mutate(SYMBOL = 'ETF') %>% bind_rows(avgTibs) %>% select(where(~!any(is.na(.x)))) %>% as.data.frame()
-			
-rplot <- ggradar(plot.data = toPlot,
-		font.radar = "roboto",
-		grid.label.size = 5,  # Affects the grid annotations (0%, 50%, etc.)
-		axis.label.size = 8, # Afftects the names of the variables
-		group.point.size = 3   # Simply the size of the point 
-	  ) +
-	labs(title = ticker, tag=paste("@StockViz", spyMaxDt)) + 
-	theme(
-	  plot.background = element_rect(fill = "#fbf9f4", color = "#fbf9f4"),
-	  panel.background = element_rect(fill = "#fbf9f4", color = "#fbf9f4"),
-	  plot.title.position = "plot", # slightly different from default
-	  plot.title = element_text(
-			family = "noto", 
-			size = 38,
-			color = "#2a475e"
-		),
-	  plot.tag = element_text(
-			family = "kanit", 
-			size = 16,
-			color = "lightgrey",
-		),
-	  plot.tag.position = "bottom"
-	) +
-	theme(
-		legend.position = c(1, 0),  
-		legend.justification = c(1, 0),
-		legend.text = element_text(size = 24, family = "roboto"),
-		legend.key = element_rect(fill = NA, color = NA),
-		legend.background = element_blank()
-	)
-	
-print(rplot)
 ```
 
+![](`r radarPlotName`)

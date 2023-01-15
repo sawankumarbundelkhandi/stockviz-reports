@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2023-01-13" />
+<meta name="date" content="2023-01-15" />
 
 <title>RYT</title>
 
@@ -273,10 +273,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="/reports/52-week-highs-lows/52wk-IN.html">India</a>
+      <a href="/reports/eq/52wk-IN.html">India</a>
     </li>
     <li>
-      <a href="/reports/52-week-highs-lows/52wk-US.html">US</a>
+      <a href="/reports/eq/52wk-US.html">US</a>
     </li>
   </ul>
 </li>
@@ -290,10 +290,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="/reports/all-time-highs/ath-IN.html">India</a>
+      <a href="/reports/eq/ath-IN.html">India</a>
     </li>
     <li>
-      <a href="/reports/all-time-highs/ath-US.html">US</a>
+      <a href="/reports/eq/ath-US.html">US</a>
     </li>
   </ul>
 </li>
@@ -307,10 +307,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="/reports/drawdown/drawdowns.html">India</a>
+      <a href="/reports/eq/drawdowns-IN.html">India</a>
     </li>
     <li>
-      <a href="/reports/drawdown/drawdowns-US.html">US</a>
+      <a href="/reports/eq/drawdowns-US.html">US</a>
     </li>
   </ul>
 </li>
@@ -324,10 +324,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="/reports/streaks/rp-IN.html">India</a>
+      <a href="/reports/eq/streaks-IN.html">India</a>
     </li>
     <li>
-      <a href="/reports/streaks/rp-US.html">US</a>
+      <a href="/reports/eq/streaks-US.html">US</a>
     </li>
   </ul>
 </li>
@@ -376,6 +376,12 @@ $(document).ready(function () {
      
   </a>
 </li>
+<li>
+  <a href="https://stockviz.substack.com">
+    <span class="fa fa-envelope-o"></span>
+     
+  </a>
+</li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -387,7 +393,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">RYT</h1>
 <h3 class="subtitle">ETF Risk Metrics</h3>
-<h4 class="date">January 13, 2023</h4>
+<h4 class="date">January 15, 2023</h4>
 
 </div>
 
@@ -396,22 +402,18 @@ $(document).ready(function () {
 <h2>Invesco S&amp;P 500 Equal Weight Technology ETF</h2>
 <div id="annual-returns" class="section level3">
 <h3>Annual Returns</h3>
-<p><img src="rp-RYT_files/figure-html/returns_chart_chunk-1.png" width="1152" /></p>
-<p><img src="rp-RYT_files/figure-html/returns_chart_chunk-2.png" width="1152" /></p>
+<p><img src="plots/RYT.fan.png" /></p>
+<p><img src="plots/RYT.annret.png" /></p>
 </div>
-<div id="cumulative-returns" class="section level3">
-<h3>Cumulative Returns</h3>
-<p><img src="rp-RYT_files/figure-html/returns_chart_chunk-3.png" width="1152" /></p>
-</div>
-<div id="drawdowns" class="section level3">
-<h3>Drawdowns</h3>
-<p><img src="rp-RYT_files/figure-html/returns_chart_chunk-4.png" width="1152" /></p>
+<div id="cumulative-returns-and-drawdowns" class="section level3">
+<h3>Cumulative Returns and Drawdowns</h3>
+<p><img src="plots/RYT.cumret.png" /></p>
 </div>
 <div id="performance-metrics" class="section level3">
 <h3>Performance Metrics</h3>
-<div id="htmlwidget-06eaa7d8ff71028ebfae" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-06eaa7d8ff71028ebfae">{"x":{"filter":"none","vertical":false,"data":[["Conditional Value at Risk (CVaR)","Kelly ratio (half) (KR)","Martin ratio (MR)","Sharpe ratio (SHARPE)","Upside potential ratio (UPR)","Value at Risk (VaR)"],[-0.04646,0.81636,0.99367,0.31919,0.65778,-0.02626],[644,998,1005,1023,786,380]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th><\/th>\n      <th>VAL<\/th>\n      <th>SCORE<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","pageLength":30,"ordering":false,"columnDefs":[{"className":"dt-right","targets":[1,2]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,25,30,50,100]}},"evals":[],"jsHooks":[]}</script>
-<p><img src="rp-RYT_files/figure-html/metrics_radar_chunk-1.png" width="1152" /></p>
+<div id="htmlwidget-ba4cf76e44cb28eaedd4" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ba4cf76e44cb28eaedd4">{"x":{"filter":"none","vertical":false,"data":[["Conditional Value at Risk (CVaR)","Kelly ratio (half) (KR)","Martin ratio (MR)","Sharpe ratio (SHARPE)","Upside potential ratio (UPR)","Value at Risk (VaR)"],[-0.04644,0.81739,0.99386,0.31965,0.65688,-0.02624],[644,996,1004,1022,780,380]],"container":"<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th><\/th>\n      <th>VAL<\/th>\n      <th>SCORE<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","pageLength":30,"ordering":false,"columnDefs":[{"className":"dt-right","targets":[1,2]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,25,30,50,100]}},"evals":[],"jsHooks":[]}</script>
+<p><img src="plots/RYT.radar.png" /></p>
 </div>
 </div>
 
