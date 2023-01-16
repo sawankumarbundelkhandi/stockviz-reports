@@ -11,6 +11,7 @@ output:
     lib_dir: risk/rmdlib	
     includes:
         in_header: header.html
+        after_body: ../footer.html		
 ---
 
 ```{r, init_chunk, echo = FALSE, message = FALSE, warning = FALSE}
@@ -39,6 +40,8 @@ lconUs2 <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Ser
 ---
 date: `r createdDate`
 ---
+
+*Reads: [The United States of ETFs](https://stockviz.biz/2021/07/11/the-united-states-of-etfs/), [Indians Investing Abroad](https://stockviz.biz/2021/07/18/indians-investing-abroad/) *
 
 ```{r, plot_create_chunk, echo = FALSE, message = FALSE, warning = FALSE}
 etfs<-read.csv("../COUNTRY_ETFS.csv")

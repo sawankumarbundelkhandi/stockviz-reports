@@ -11,6 +11,7 @@ output:
     lib_dir: risk/rmdlib
     includes:
         in_header: header.html
+        after_body: ../footer.html
 ---
 
 ```{r, init_chunk, echo = FALSE, message = FALSE, warning = FALSE}

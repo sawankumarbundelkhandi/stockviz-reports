@@ -12,6 +12,7 @@ output:
     toc: true
     includes:
         in_header: header.html
+        after_body: ../footer.html
 ---
 
 ```{r, init_chunk, echo = FALSE, message = FALSE, warning = FALSE}
@@ -34,6 +35,8 @@ lconUs2 <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Ser
 ---
 date: `r createdDate`
 ---
+
+*Reads: [The United States of ETFs](https://stockviz.biz/2021/07/11/the-united-states-of-etfs/), [Indians Investing Abroad](https://stockviz.biz/2021/07/18/indians-investing-abroad/) *
 
 ```{r, metrics_load_chunk, echo = FALSE, message = FALSE, warning = FALSE}
 maxDt <- sqlQuery(lconUs2, "select max(time_stamp) from EQ_CAPM") [[1]]

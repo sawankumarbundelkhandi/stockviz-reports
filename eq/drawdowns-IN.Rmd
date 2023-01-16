@@ -12,6 +12,7 @@ output:
     toc: true
     includes:
         in_header: header.html
+        after_body: ../footer.html		
 ---
 
 ```{r dt_chunk, include=FALSE}

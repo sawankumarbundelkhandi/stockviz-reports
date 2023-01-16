@@ -40,6 +40,8 @@ options(stringsAsFactors = FALSE)
 lcon <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, ldbname, ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 lconUs2 <- odbcDriverConnect(sprintf("Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;Uid=%s;Pwd=%s;", ldbserver, "StockVizUs2", ldbuser, ldbpassword), case = "nochange", believeNRows = TRUE)
 
+benchmarks <- list("Equity" = c('SPY', 'QQQ'), "Fixed Income" = c('AGG', 'LQD'), "Asset Allocation" = c('SPY', 'AGG'))
+
 #render("rp-country.Rmd", output_file="rp-country.html")
 #render("rp-risk.Rmd", output_file="rp-risk.html")
 #q()
@@ -50,13 +52,28 @@ maxDt <- sqlQuery(lconUs2, "select max(time_stamp) from EQ_CAPM") [[1]]
 plottedTickers <- c()
 createPlots <- function(){
 	etfTickers <- sqlQuery(lconUs2, sprintf("select distinct symbol from eq_capm where time_stamp = '%s'", maxDt))[,1]
-	etfMetaDf <- sqlQuery(lcon, "select SYMBOL, ASSET_CLASS from ETF_META")
+	etfMetaDf <- sqlQuery(lcon, "select SYMBOL, FUND, ASSET_CLASS from ETF_META")
+	
+	bXts <- NULL
+	for(betf in unlist(benchmarks)){
+		bDf <- sqlQuery(lconUs2, sprintf("select c, time_stamp from BHAV_EQ_TD where symbol='%s'", betf))
+		bXts <- merge.xts(bXts, xts(bDf[,1], bDf[,2]))
+	}
+	
+	names(bXts) <- unlist(benchmarks)
+	
+	bRetDaily <- do.call(merge, apply(bXts, 2, function(X) dailyReturn(X)))
+	bRetAnn <- do.call(merge, apply(bXts, 2, function(X) annualReturn(X)))
+	
+	names(bRetDaily) <- unlist(benchmarks)
+	names(bRetAnn) <- unlist(benchmarks)
 	
 	for(i in 1:length(etfTickers)){
 		ticker <- etfTickers[i]
 		fName <- gsub("[^[:alnum:] ]| ", "", ticker)
 		
-		etfName <- sqlQuery(lcon, sprintf("select FUND from ETF_META where symbol='%s'", ticker))[[1]]
+		etfName <- etfMetaDf[etfMetaDf$SYMBOL == ticker, ]$FUND[1]
+		ac <- etfMetaDf[etfMetaDf$SYMBOL == ticker,]$ASSET_CLASS[1]
 		
 		etfMaxDate <- sqlQuery(lconUs2, sprintf("select max(time_stamp) from BHAV_EQ_TD where symbol='%s'", ticker))[[1]]
 		etfMinDate <- sqlQuery(lconUs2, sprintf("select min(time_stamp) from BHAV_EQ_TD where symbol='%s'", ticker))[[1]]
@@ -67,7 +84,7 @@ createPlots <- function(){
 		}
 
 		etfMinDate <- as.Date(sprintf("%d-01-01", year(etfMinDate)+1))
-
+		
 		tryCatch({
 			iDf1 <- sqlQuery(lconUs2, sprintf("select c, time_stamp from BHAV_EQ_TD where symbol='%s' and time_stamp >= '%s'", ticker, etfMinDate))
 			iXts <- xts(iDf1[,1], iDf1[,2])
@@ -78,11 +95,25 @@ createPlots <- function(){
 			names(retDaily) <- c(ticker)
 			names(retAnn) <- c(ticker)
 			
-			Common.PlotCumReturns(retDaily, ticker, etfName, sprintf("%s/%s.cumret.png", plotPath, fName))
+			retDailyDf <- data.frame(retDaily)
+			retDailyDf$T <- index(retDaily)
+			
+			benchDailyDf <- data.frame(bRetDaily[, benchmarks[[ac]]])
+			benchDailyDf$T <- index(bRetDaily)
+			
+			mergedDaily <- retDailyDf %>% inner_join(benchDailyDf, by='T') %>% filter(T >= etfMinDate) %>% relocate(T)
+			mergedDailyXts <- na.trim(xts(mergedDaily[, -1], mergedDaily[,1]), sides='left')
+			
+			Common.PlotCumReturns(mergedDailyXts, ticker, etfName, sprintf("%s/%s.cumret.png", plotPath, fName))
 
-			toPlotAnn <- data.frame(retAnn*100)
-			toPlotAnn$Y <- year(index(retAnn))
-
+			retAnnDf <- data.frame(retAnn * 100)
+			retAnnDf$Y <- year(index(retAnn))
+			
+			benchAnnDf <- data.frame(bRetAnn[, benchmarks[[ac]]] * 100)
+			benchAnnDf$Y <- year(index(bRetAnn))
+			
+			toPlotAnn <- retAnnDf %>% inner_join(benchAnnDf, by='Y') %>% relocate(Y) %>% as.data.frame()
+						
 			maxYear <- length(unique(toPlotAnn$Y))
 			toPlotAnn <- melt(toPlotAnn, id='Y')
 			minRet <- min(toPlotAnn$value)
@@ -105,8 +136,6 @@ createPlots <- function(){
 			metricMap <- read.csv(paste0(idPath, "/metric_map.csv"))
 
 			statsDf <- sqlQuery(lconUs2, sprintf("select SYMBOL, ID, VAL from EQ_CAPM where time_stamp = '%s'", spyMaxDt)) 
-
-			ac <- etfMetaDf[etfMetaDf$SYMBOL == ticker,]$ASSET_CLASS[1]
 
 			dataDf <- statsDf %>% inner_join(etfMetaDf, by='SYMBOL') %>% filter(ASSET_CLASS == ac) %>% select(SYMBOL, ID, VAL)
 

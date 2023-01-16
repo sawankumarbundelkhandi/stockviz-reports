@@ -13,6 +13,7 @@ output:
     lib_dir: rmdlib
     includes:
         in_header: ../header.html
+        after_body: ../../footer.html
 ---
 
 ```{r, init_chunk, echo = FALSE, message = FALSE, warning = FALSE}
