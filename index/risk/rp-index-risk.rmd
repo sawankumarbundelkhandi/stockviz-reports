@@ -63,6 +63,17 @@ retAnn <- annualReturn(iXts)
 names(retDaily) <- c(iName)
 names(retAnn) <- c(iName)
 
+benchName <- "NIFTY TOTAL MARKET TR"
+bDf1 <- sqlQuery(lcon, sprintf("select px_close, time_stamp from bhav_index where index_name='%s' and time_stamp >= '%s' order by time_stamp", benchName, first(index(iXts))))
+bXts <- xts(bDf1[,1], bDf1[,2])
+
+bRetDaily <- dailyReturn(bXts)
+bRetAnn <- annualReturn(bXts)
+
+names(bRetDaily) <- c(benchName)
+names(bRetAnn) <- c(benchName)
+
+
 ```
 
 ---
@@ -71,10 +82,10 @@ date: `r createdDate`
 ---
 
 ```{r, perf_chunk, echo = FALSE, message = FALSE, warning = FALSE}
-cumRetChart <- chart.CumReturns(retDaily, main = iName, legend.loc = 'topleft')
-drawdownChart <- chart.Drawdown(retDaily, main = iName, legend.loc = 'bottomleft')
+cumRetChart <- chart.CumReturns(merge(retDaily, bRetDaily), main = iName, legend.loc = 'topleft')
+drawdownChart <- chart.Drawdown(merge(retDaily, bRetDaily), main = iName, legend.loc = 'bottomleft')
 
-toPlotAnn <- data.frame(retAnn*100)
+toPlotAnn <- data.frame(merge(retAnn, bRetAnn)*100)
 toPlotAnn$Y <- year(index(retAnn))
 
 maxYear <- length(unique(toPlotAnn$Y))

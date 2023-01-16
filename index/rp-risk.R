@@ -14,6 +14,8 @@ maxDt <- sqlQuery(lcon, "select max(time_stamp) from index_capm")[[1]]
 
 indices <- sqlQuery(lcon, sprintf("select distinct index_name from index_capm where time_stamp = '%s'", maxDt))[,1]
 
+#indices <- c("NIFTY NON-CYCLICAL CONSUMER TR")
+
 #render("rp-risk.Rmd", output_file="rp-risk.html")
 #q()
 
@@ -29,6 +31,7 @@ for(i in 1:length(indices)){
 	}, error=function(e){print(e)})
 }
 
+#q()
 print("rendering master page...")
 
 render("rp-risk.Rmd", output_file="rp-risk.html")
