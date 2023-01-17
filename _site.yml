@@ -42,7 +42,7 @@ navbar:
     - text: "Indian Indices"
       icon: fa-hand-pointer-o
       menu:
-        - text: "Risk Metrics"
+        - text: "Performance Metrics"
           href: /reports/index/rp-risk.html  
         - text: "Changes"
           href: /reports/index/rp-IN.html  
