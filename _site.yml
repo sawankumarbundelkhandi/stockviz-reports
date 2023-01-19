@@ -1,5 +1,5 @@
 navbar:
-  title: "StockViz"                            
+  title: "StockViz"
   type: inverse
   left:
     - text: "Macro"

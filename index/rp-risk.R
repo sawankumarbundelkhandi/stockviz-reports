@@ -175,7 +175,7 @@ renderIndices <- function(){
 }
 
 print("creating plots...")
-#createPlots()
+createPlots()
 
 print("rendering indices...")
 renderIndices()
