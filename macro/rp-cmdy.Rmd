@@ -82,7 +82,7 @@ doCommFutPlots <- function(iName){
 ```
 
 ```{r, print_chunk, echo = FALSE, results='asis', message = FALSE, warning = FALSE, fig.height=6, fig.width=12}
-indices <- c('WTI Financial Futures', 'Gold Futures', 'Copper Financial Futures')
+indices <- c('WTI Financial Futures', 'Gold Futures', 'Copper Financial Futures', 'Silver Futures')
 for(i in indices){
 	plts <- doCommFutPlots(i)
 	cat("\n\n### ", i, "\n\n")
